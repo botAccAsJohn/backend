@@ -3,9 +3,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const userSchema = mongoose.Schema({
+  fullname: { type: String, required: true },
+  address: { type: String, required: true },
+  gender: { type: String, enum: ["Male", "Female"], required: true },
   phone: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
     validate: {
       validator: function (v) {
@@ -41,7 +45,8 @@ userSchema.methods.isCorrectPassword = async function (password) {
 };
 
 // Generating JWT Access Token
-userSchema.methods.generateAccessToken =  function () { //async <--
+userSchema.methods.generateAccessToken = function () {
+  //async <--
   const token = jwt.sign(
     {
       id: this._id,

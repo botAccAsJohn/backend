@@ -3,9 +3,11 @@ import asyncHandler from "../utils/asyncHandler.js";
 import apiResponse from "../utils/apiErro.js";
 import apiError from "../utils/apiErro.js";
 import jwt from "jsonwebtoken";
+import generateAccessAndRefereshTokens from "../utils/generateAccessAndRefereshTokens.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { phone, password } = req.body;
+  console.log("type of  the phone : =>", typeof phone);
 
   if (!password || !phone) {
     return res.status(400).json(new apiError(400, "Please enter all fields"));
@@ -144,49 +146,53 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 // });
 
-// const refreshAccessToken = asyncHandler(async (req, res) => {
-//   const refreshToken = req.cookies?.refreshToken;
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
 
-//   if (!refreshToken) throw new apiError(401, "Please Provide a refresh token");
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "unauthorized request");
+  }
 
-//   const decodedToken = await jwt.decode(
-//     refreshToken,
-//     process.env.REFRESH_TOKEN_SECRET
-//   );
-//   //   console.log(decodedToken);
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
 
-//   if (!decodedToken) throw new apiError(401, "Invalid refresh token");
+    const user = await User.findById(decodedToken?._id);
 
-//   const user = await User.findById(decodedToken.id);
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
 
-//   console.log(user);
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new ApiError(401, "Refresh token is expired or used");
+    }
 
-//   if (!user) throw new apiError(401, "Invalid Refresh token");
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
 
-//   if (!user.refreshToken === refreshToken) {
-//     throw new apiError(401, "Invalid Refresh token");
-//   }
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefereshTokens(user._id);
 
-//   const accessToken = await user.generateAccessToken();
-//   // const newRefreshToken = await user.generateRefreshToken();
-
-//   const options = {
-//     expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production",
-//   };
-
-//   res
-//     .status(200)
-//     .cookie("accessToken", accessToken, options)
-//     .json(
-//       new apiResponse(
-//         200,
-//         { accessToken, refreshToken },
-//         "Refreshed successfully"
-//       )
-//     );
-// });
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken },
+          "Access token refreshed"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(401, error?.message || "Invalid refresh token");
+  }
+});
 
 // const changePassword = asyncHandler(async (req, res) => {
 //   const { usernameOrEmail, password } = req.body;
@@ -322,4 +328,10 @@ const getUserDetails = asyncHandler(async (req, res) => {
 //   sendMail
 // };
 
-export { registerUser, loginUser, logoutUser, getUserDetails };
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserDetails,
+  refreshAccessToken,
+};
