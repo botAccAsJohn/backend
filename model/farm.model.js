@@ -18,4 +18,8 @@ const farmSchema = new mongoose.Schema({
 });
 
 const Farm = mongoose.model("Farm", farmSchema);
+<<<<<<< HEAD
 module.exports = Farm;
+=======
+export default Farm;
+>>>>>>> master
