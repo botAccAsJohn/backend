@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const lineSchema = new mongoose.Schema({
     value: Number,
     timestamp: { type: Date, default: Date.now }

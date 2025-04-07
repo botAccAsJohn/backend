@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const cropSchema = new mongoose.Schema({
   cropName: { type: String, required: true },
   cropType: {
@@ -21,4 +23,4 @@ const cropSchema = new mongoose.Schema({
 });
 
 const Crop = mongoose.model("Crop", cropSchema);
-module.exports = Crop;
+export default Crop;

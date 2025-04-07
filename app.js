@@ -2,9 +2,14 @@ import connectDb from "./db/index.js";
 import isLoggedIn from "./middelware/loggedIn.js";
 import refreshAccessToken from "./middelware/refreshAceesToken.js";
 import expressServer from "./utils/index.js";
+import irrigationRoutes from './router/irrigationRoutes.js';
 // import authenticateUser from "../utils/auth.js";
 import apiResponse from "./utils/apiResponse.js";
 import userRouter from "./router/user.router.js";
+import plotRoutes from "./router/plot.route.js";
+
+
+
 
 const app = expressServer();
 
@@ -12,6 +17,11 @@ const app = expressServer();
 
 // routes
 app.use("/api/auth", userRouter);
+
+app.use('/api/irrigation', irrigationRoutes);
+
+app.use("/api/plot", plotRoutes);
+
 
 //Home Route
 app.get("/", refreshAccessToken, isLoggedIn, (req, res) => {

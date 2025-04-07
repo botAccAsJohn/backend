@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const farmSchema = new mongoose.Schema({
   farmName: { type: String, required: true },
   farmID: { type: String, required: true, unique: true },
@@ -18,8 +20,4 @@ const farmSchema = new mongoose.Schema({
 });
 
 const Farm = mongoose.model("Farm", farmSchema);
-<<<<<<< HEAD
-module.exports = Farm;
-=======
 export default Farm;
->>>>>>> master

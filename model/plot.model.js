@@ -1,3 +1,5 @@
+import mongoose from "mongoose"
+
 const plotSchema = new mongoose.Schema({
   plotName: { type: String, required: true },
   plotSize: { type: Number, required: true },
@@ -15,4 +17,4 @@ const plotSchema = new mongoose.Schema({
 });
 
 const Plot = mongoose.model("Plot", plotSchema);
-module.exports = Plot;
+export default Plot;
